@@ -1,47 +1,52 @@
-# 📊 Expensync – Personal Finance Tracker
+# 📊 Expensync — Personal Finance Tracker
 
-Expensync is a full-stack personal finance tracker built with the **MERN stack**, **Tailwind CSS**, and **Chart.js**. This platform helps users track their **income**, **expenses**, and **set budget goals** while offering real-time insights and visualizations to aid in better financial planning.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Status](https://img.shields.io/badge/status-active-brightgreen)
+![Built With](https://img.shields.io/badge/Built%20with-MERN%20Stack-blue)
+
+**Expensync** is a full-stack personal finance tracker built with the **MERN stack**, **Tailwind CSS**, and **Chart.js**. This platform helps users track their **income**, **expenses**, and **budget goals**, offering real-time insights and beautiful visualizations for smarter financial decisions.
 
 ---
 
 ## 🚀 Features
 
-- 🔐 **User Authentication**: Secure login and registration system with JWT.
-- 💰 **Income & Expense Tracking**: Track and manage all your financial transactions.
-- 📅 **Budget Goals**: Set monthly budget goals for categories like Food, Utilities, etc.
-- 📈 **Dynamic Analytics**: Real-time Pie & Doughnut charts to visualize your finances.
-- 🧾 **Category Filtering**: Filter transactions by category for in-depth analysis.
-- ⏰ **Transaction Reminders**: Get notified for upcoming or recurring expenses.
-- 📱 **Responsive Design**: Fully responsive using Tailwind CSS for mobile and desktop.
+- 🔐 **User Authentication** — Secure login and signup with JWT  
+- 💰 **Track Income & Expenses** — Log and categorize your transactions  
+- 🎯 **Set Budget Goals** — Define monthly limits by category  
+- 📊 **Real-time Charts** — Visualize data with Pie & Doughnut graphs  
+- 🧾 **Filter by Category** — Deep dive into specific spending areas  
+- ⏰ **Reminders** — Add upcoming or recurring transactions  
+- 📱 **Responsive Design** — Mobile-first UI with Tailwind CSS
 
 ---
 
-## 🛠️ Technologies Used
+## 🛠️ Tech Stack
 
-- **MongoDB** – NoSQL database
-- **Express.js** – Backend framework
-- **React** – Frontend library
-- **Node.js** – JavaScript runtime
-- **JWT** – For secure authentication
-- **Chart.js** – For rendering Pie & Doughnut charts
-- **Tailwind CSS** – For modern and responsive UI
-- **OpenWeather API** – (Optional) Weather integration feature
+- **MongoDB** — NoSQL database  
+- **Express.js** — Backend framework  
+- **React.js** — Frontend library  
+- **Node.js** — Server runtime  
+- **JWT** — Authentication via tokens  
+- **Chart.js** — Financial data visualization  
+- **Tailwind CSS** — Utility-first responsive styling  
+- **OpenWeather API** *(optional)* — Weather integration
 
 ---
 
-## 🖥️ Installation
+## 📦 Installation Guide
 
 ### ⚙️ Prerequisites
 
-- Node.js (v16 or above)
-- MongoDB or MongoDB Atlas
+- Node.js v16+  
+- MongoDB or MongoDB Atlas  
 
 ---
 
-### 📁 Clone the repository
+### 📁 Clone Repository
 
 ```bash
 git clone https://github.com/your-username/expensync.git
+cd expensync
 ```
 
 ---
@@ -49,11 +54,11 @@ git clone https://github.com/your-username/expensync.git
 ### 🔧 Backend Setup
 
 ```bash
-cd expensync/backend
+cd backend
 npm install
 ```
 
-Create a `.env` file and add the following:
+Create a `.env` file in `backend/` and add:
 
 ```env
 MONGO_URI=your_mongodb_connection_string
@@ -61,7 +66,7 @@ JWT_SECRET=your_jwt_secret_key
 PORT=5000
 ```
 
-Run the backend server:
+Start the backend server:
 
 ```bash
 npm start
@@ -72,84 +77,86 @@ npm start
 ### 💻 Frontend Setup
 
 ```bash
-cd expensync/frontend
+cd ../frontend
 npm install
 npm start
 ```
 
-Visit: [http://localhost:3000](http://localhost:3000)
+Open in browser: [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## 📊 Demo
+## 📊 Live Demo
 
-Check out the live version:
-
-👉 [Demo Link](https://your-demo-link.com)
-
----
-
-## 📚 Usage
-
-- **Sign Up / Log In**: Create an account to start tracking your finances.
-- **Add Transactions**: Add income or expenses, select categories, and manage your records.
-- **Set Budget Goals**: Define monthly budgets per category and track your progress.
-- **Visualize Data**: Use real-time charts to understand spending habits.
-- **Set Reminders**: Add upcoming or recurring transaction reminders.
+Check out the live version:  
+👉 [https://your-demo-link.com](https://your-demo-link.com)
 
 ---
 
-## 📈 Analytics & Charts
+## 📸 Screenshots
 
-- **Expense Chart**: Visualize expenses by category.
-- **Income vs Expense**: Compare your income and spending.
-- **Budget Progress**: See how well you're sticking to your budget.
+### 🖥️ Dashboard Preview
 
----
+![Expensync Full Demo](./public/demo.png)
 
-## 🔐 Security
+### 🌞 Light Mode | 🌙 Dark Mode
 
-- **JWT Authentication**: Secure access to personal data.
-- **Hashed Passwords**: All passwords are hashed using bcrypt.
-- **Protected Routes**: Backend routes are protected for authorized users only.
+| Light Mode                            | Dark Mode                             |
+| ------------------------------------ | ------------------------------------- |
+| ![Light](./public/light.png)         | ![Dark](./public/dark.png)           |
 
----
-
-## 💡 Future Features
-
-- 🌙 Dark Mode support
-- 🔁 Recurring Transactions
-- 💳 Debt Tracking
-- 📊 Advanced Financial Forecasts
+> 📷 _You can replace these screenshots with actual UI previews by saving them inside `/public/` folder in your frontend project._
 
 ---
 
-## 🔧 Contributing
+## 📚 Usage Instructions
 
-We welcome contributions! Feel free to fork this repo and submit pull requests for new features or bug fixes.
+- **Sign Up / Log In** to access your dashboard  
+- **Add Transactions** with categories and amounts  
+- **Set Monthly Goals** and track your progress  
+- **Visualize with Charts** and analyze your trends  
+- **Get Reminders** for important recurring expenses
+
+---
+
+## 📈 Analytics Overview
+
+- 📌 **Category Charts** — See where your money goes  
+- 🔄 **Income vs Expenses** — Understand your balance  
+- ✅ **Budget Progress** — Stay on track with limits
+
+---
+
+## 🔐 Security Highlights
+
+- 🔒 **JWT Authentication** for protected routes  
+- 🔑 **Hashed Passwords** with bcrypt  
+- 🚫 **Unauthorized Access Prevention**
+
+---
+
+## 🌟 Upcoming Features
+ 
+- 🔁 Recurring Transactions  
+- 💳 Real Time Link With Banks   
+- 📉 Advanced Budget Forecasting
 
 ---
 
 ## 👨‍💻 Author
 
-**Your Name**  
-GitHub: [Jitesh8260](https://github.com/Jitesh8260)  
-LinkedIn: [JiteshKumar](https://www.linkedin.com/in/jitesh-kumar-2521b7249/)
+**Jitesh Bhakat**  
+GitHub: [@Jitesh8260](https://github.com/Jitesh8260)  
+LinkedIn: [Jitesh Kumar](https://www.linkedin.com/in/jitesh-kumar-2521b7249/)
 
 ---
 
-## 🙏 Thank You!
+## 🙏 Thank You
 
 Thank you for checking out **Expensync**!  
-Hope it helps you take better control of your finances and build smarter money habits. 💸📊
+Hope it helps you manage money better and plan smarter 💸
 
-If you like this project, don’t forget to ⭐ star the repo and share it with your friends.  
-Feel free to contribute or raise issues — **every bit helps**!
+If you found this useful, please ⭐ the repo and share it!
 
----
-
-> _“Budgeting isn't about limiting yourself — it's about making room for the things that matter most.”_
-
-Happy Coding! 🚀✨  
-— Team Expensync 💙
+> _"Budgeting isn't about limiting yourself — it's about making room for the things that matter most."_
 
