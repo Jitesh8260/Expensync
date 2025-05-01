@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Sans:wght@500;700&display=swap');
+
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  body {
+    font-family: 'Poppins', sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    font-family: 'DM Sans', sans-serif;
+  }
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* ...rest of your custom-scroll and overflow styles */
+
+
+.custom-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.3);
+  /* slate-500/30 */
+  border-radius: 6px;
+  transition: background 0.3s;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 116, 139, 0.5);
+}
+
+body,
+html {
+  overflow-x: hidden;
+}
+
+.max-w-7xl {
+  overflow-x: hidden;
+}
+
+/* Light Mode */
+:root {
+  --color-primary: #f4f7fa;
+  /* Soft off-white background */
+  --color-secondary: #00aaff;
+  /* Cool cyan for secondary accents */
+  --color-dim-white: rgba(0, 0, 0, 0.7);
+  /* Dimmed text for readability */
+  --color-dim-blue: rgba(9, 151, 124, 0.1);
+  /* Lightened blue for background highlights */
+}
+
+/* Dark Mode */
+[data-theme='dark'] {
+  --color-primary: #00040f;
+  /* Dark background */
+  --color-secondary: #00f6ff;
+  /* Vibrant cyan accent */
+  --color-dim-white: rgba(255, 255, 255, 0.7);
+  /* Dimmed white for text */
+  --color-dim-blue: rgba(9, 151, 124, 0.1);
+  /* Dark blue background highlight */
+}
+
+@theme {
+  --breakpoint-xs: 30rem;    /* 480px */
+  --breakpoint-ss: 38.75rem; /* 620px */
+  --breakpoint-sm: 48rem;    /* 768px */
+  --breakpoint-md: 66.25rem; /* 1060px */
+  --breakpoint-lg: 75rem;    /* 1200px */
+  --breakpoint-xl: 106.25rem;/* 1700px */
+}

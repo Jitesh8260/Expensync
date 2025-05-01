@@ -1,0 +1,62 @@
+import React from "react";
+import ExpenseChart from "./ExpenseChart";
+import ExpenseCategoryChart from "./ExpenseCategoryChart";
+import { motion } from "framer-motion";
+import Layout from "./Layout";
+
+const Charts = ({ totalIncome, totalExpense, transactions }) => {
+    return (
+        <Layout>
+            {/* <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+            // className="mt-20 px-6 sm:px-10 lg:px-16 max-w-[1440px] mx-auto"
+        > */}
+            {/* Dashboard Container */}
+            <div className="rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-gradient-to-b from-slate-50 to-white dark:from-[#0c0f1c] dark:to-[#1a1d2e] p-6 sm:p-10 space-y-10">
+
+                {/* Heading Section */}
+                <div className="text-center">
+                    <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-[#1E2A45] dark:text-white drop-shadow">
+                        Financial Dashboard
+                    </h2>
+                    <p className="mt-4 text-lg sm:text-xl text-slate-700 dark:text-slate-400 max-w-2xl mx-auto">
+                        A visual glance at your income and spending patterns.
+                    </p>
+                </div>
+
+                {/* Charts Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Left: Income vs Expense */}
+                    <motion.div
+                        // className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-slate-200 dark:border-slate-700 transition-all duration-300 hover:scale-[1.02]"
+                        whileHover={{ scale: 1.02 }}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1, duration: 0.6 }}
+                    >
+                        <h3 className="text-xl font-semibold text-[#1E2A45] dark:text-white mb-4">Income vs Expense</h3>
+                        <ExpenseChart totalIncome={totalIncome} totalExpense={totalExpense} />
+                    </motion.div>
+
+                    {/* Right: Expense Categories */}
+                    <motion.div
+                        // className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-slate-200 dark:border-slate-700 transition-all duration-300 hover:scale-[1.02]"
+                        whileHover={{ scale: 1.02 }}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2, duration: 0.6 }}
+                    >
+                        <h3 className="text-xl font-semibold text-[#1E2A45] dark:text-white mb-4">Spending by Category</h3>
+                        <ExpenseCategoryChart transactions={transactions} />
+                    </motion.div>
+                </div>
+            </div>
+        {/* </motion.div>  */}
+        </Layout>
+        
+    );
+};
+
+export default Charts;
