@@ -89,7 +89,7 @@ Open in browser: [http://localhost:3000](http://localhost:3000)
 ## 📊 Live Demo
 
 Check out the live version:  
-👉 [https://your-demo-link.com](https://your-demo-link.com)
+👉 [https://your-demo-link.com](willbeavailable)
 
 ---
 
@@ -105,7 +105,6 @@ Check out the live version:
 | ------------------------------------ | ------------------------------------- |
 | ![Light](./public/light.png)         | ![Dark](./public/dark.png)           |
 
-> 📷 _You can replace these screenshots with actual UI previews by saving them inside `/public/` folder in your frontend project._
 
 ---
 
