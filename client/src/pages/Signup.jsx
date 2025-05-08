@@ -24,7 +24,7 @@ const Signup = () => {
 
         try {
             // Make the actual API call to the backend
-            const res = await fetch("http://localhost:5000/api/auth/signup", {
+            const res = await fetch("https://expensync-ex0w.onrender.com/api/auth/signup", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
