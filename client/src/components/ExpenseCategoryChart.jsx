@@ -6,7 +6,6 @@ Chart.register(ArcElement, Tooltip, Legend);
 
 const ExpenseCategoryChart = ({ transactions = [] }) => {
     // Original dynamic logic (future use):
-    /*
     if (!Array.isArray(transactions)) {
         console.error("Expected transactions to be an array, but received:", transactions);
         return null;
@@ -19,17 +18,17 @@ const ExpenseCategoryChart = ({ transactions = [] }) => {
         }
         return acc;
     }, {});
-    */
+    
 
     // Dummy static data for now:
-    const categoryTotals = {
-        Food: 1200,
-        Travel: 800,
-        Shopping: 500,
-        Rent: 3000,
-        Entertainment: 600,
-        Other: 400,
-    };
+    // const categoryTotals = {
+    //     Food: 1200,
+    //     Travel: 800,
+    //     Shopping: 500,
+    //     Rent: 3000,
+    //     Entertainment: 600,
+    //     Other: 400,
+    // };
 
     const data = {
         labels: Object.keys(categoryTotals),

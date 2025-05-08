@@ -7,37 +7,43 @@ const Signup = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ name: "", email: "", password: "" });
 
+    // Handle input changes
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-        localStorage.setItem("token", "dummy-token");
-        alert("Signup Bypassed Successfully!");
-        navigate("/home");
 
-        // Uncomment to enable real signup functionality
-        // const res = await fetch("http://localhost:5000/api/auth/signup", {
-        //     method: "POST",
-        //     headers: { "Content-Type": "application/json" },
-        //     body: JSON.stringify(formData),
-        // });
-        // const data = await res.json();
-        // if (data.success) {
-        //     alert("Signup Successful!");
-        //     navigate("/login");
-        // } else {
-        //     alert(data.msg);
-        // }
-    };
+        // Basic validation
+        if (!formData.name || !formData.email || !formData.password) {
+            alert("Please fill in all fields.");
+            return;
+        }
 
-    const handleGoogleLogin = () => {
-        localStorage.setItem("token", "google-dummy-token");
-        alert("Google Signup Bypassed Successfully!");
-        navigate("/home");
+        try {
+            // Make the actual API call to the backend
+            const res = await fetch("http://localhost:5000/api/auth/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData),
+            });
 
-        // Real Google OAuth can be added here
+            const data = await res.json();
+
+            if (res.ok) {
+                // Successful signup, redirect to login page
+                alert("Signup Successful! Please login.");
+                navigate("/login");
+            } else {
+                // Handle failure response from backend
+                alert(data.msg || "Signup failed. Please try again.");
+            }
+        } catch (err) {
+            // Handle any other errors
+            alert("Something went wrong. Please try again later.");
+        }
     };
 
     return (
@@ -65,6 +71,7 @@ const Signup = () => {
                                     type="text"
                                     name="name"
                                     placeholder="Full Name"
+                                    value={formData.name}
                                     onChange={handleChange}
                                     className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-400 text-slate-800 dark:text-gray-100 bg-gray-100 dark:bg-slate-800 transition-transform duration-300 hover:scale-105"
                                 />
@@ -72,6 +79,7 @@ const Signup = () => {
                                     type="email"
                                     name="email"
                                     placeholder="Email"
+                                    value={formData.email}
                                     onChange={handleChange}
                                     className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-400 text-slate-800 dark:text-gray-100 bg-gray-100 dark:bg-slate-800 transition-transform duration-300 hover:scale-105"
                                 />
@@ -79,6 +87,7 @@ const Signup = () => {
                                     type="password"
                                     name="password"
                                     placeholder="Password"
+                                    value={formData.password}
                                     onChange={handleChange}
                                     className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-400 text-slate-800 dark:text-gray-100 bg-gray-100 dark:bg-slate-800 transition-transform duration-300 hover:scale-105"
                                 />
@@ -100,8 +109,11 @@ const Signup = () => {
                             </div>
 
                             {/* Google Signup */}
+                            {/* Keeping Google signup button unchanged */}
                             <button
-                                onClick={handleGoogleLogin}
+                                onClick={() => {
+                                    alert("Google Signup is not implemented.");
+                                }}
                                 className="w-full py-3 bg-white dark:bg-slate-900 text-black dark:text-white border border-gray-300 dark:border-slate-600 rounded-lg shadow-md hover:bg-red-400 hover:text-white hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
                             >
                                 <img

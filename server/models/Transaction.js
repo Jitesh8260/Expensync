@@ -16,9 +16,14 @@ const TransactionSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        enum: ["Food", "Bills", "Shopping", "Travel", "Others"], // customize as needed
+        enum: ["Food", "Bills", "Shopping", "Travel","Entertainment", "Income", "Others"], // customize as needed
         default: "Others",
     },
+    note: { 
+        type: String,
+        default: '' 
+    },
+    tags: [{ type: String }],
     date: {
         type: Date,
         default: Date.now,

@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
-
 
 const TransactionReminders = () => {
     const [reminders, setReminders] = useState([]);
@@ -13,6 +13,24 @@ const TransactionReminders = () => {
         isRecurring: false,
     });
 
+    const API_URL = "http://localhost:5000/api/reminders"; // Update if different
+    const token = localStorage.getItem("token"); // Assuming JWT token is stored here
+
+    // Fetch reminders on mount
+    useEffect(() => {
+        const fetchReminders = async () => {
+            try {
+                const res = await axios.get(API_URL, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setReminders(res.data);
+            } catch (err) {
+                console.error("Error fetching reminders:", err);
+            }
+        };
+        fetchReminders();
+    }, [token]);
+
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setForm((prev) => ({
@@ -21,21 +39,37 @@ const TransactionReminders = () => {
         }));
     };
 
-    const handleAddReminder = (e) => {
+    const handleAddReminder = async (e) => {
         e.preventDefault();
-        const newReminder = {
-            id: Date.now(),
-            ...form,
-        };
-        setReminders((prev) => [...prev, newReminder]);
-        setForm({
-            title: "",
-            amount: "",
-            category: "Others",
-            date: "",
-            isRecurring: false,
-        });
-        setShowForm(false); // close form after submit
+        try {
+            const res = await axios.post(
+                `${API_URL}/create`,
+                form,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setReminders((prev) => [...prev, res.data]);
+            setForm({
+                title: "",
+                amount: "",
+                category: "Others",
+                date: "",
+                isRecurring: false,
+            });
+            setShowForm(false);
+        } catch (err) {
+            console.error("Error creating reminder:", err);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        try {
+            await axios.delete(`${API_URL}/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setReminders((prev) => prev.filter((r) => r._id !== id));
+        } catch (err) {
+            console.error("Error deleting reminder:", err);
+        }
     };
 
     return (
@@ -44,7 +78,6 @@ const TransactionReminders = () => {
                 ⏰ Transaction Reminders
             </h3>
 
-            {/* Reminders List */}
             {reminders.length === 0 ? (
                 <div className="text-center text-slate-500 dark:text-slate-400">
                     <div className="text-5xl animate-pulse mb-2">🕒</div>
@@ -54,7 +87,7 @@ const TransactionReminders = () => {
                 <ul className="space-y-5 max-h-64 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent hover:scrollbar-thumb-purple-400 dark:hover:scrollbar-thumb-purple-500 overflow-x-hidden">
                     {reminders.map((reminder) => (
                         <li
-                            key={reminder.id}
+                            key={reminder._id}
                             className="flex justify-between items-center bg-gradient-to-tr from-white/60 to-slate-100/60 dark:from-slate-800/60 dark:to-slate-700/60 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-2xl px-6 py-4 shadow-lg hover:scale-[1.02] transition-all duration-300"
                         >
                             <div>
@@ -68,13 +101,18 @@ const TransactionReminders = () => {
                                 {reminder.isRecurring && (
                                     <span className="text-xs text-emerald-600 dark:text-emerald-400">Recurring</span>
                                 )}
+                                <button
+                                    onClick={() => handleDelete(reminder._id)}
+                                    className="text-xs text-red-500 hover:underline ml-4"
+                                >
+                                    🗑️
+                                </button>
                             </div>
                         </li>
                     ))}
                 </ul>
             )}
 
-            {/* Toggle Button */}
             <div className="flex justify-center">
                 <button
                     onClick={() => setShowForm(!showForm)}
@@ -84,7 +122,6 @@ const TransactionReminders = () => {
                 </button>
             </div>
 
-            {/* Reminder Form */}
             <AnimatePresence>
                 {showForm && (
                     <motion.form

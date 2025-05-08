@@ -9,6 +9,11 @@ router.post("/signup", async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
+        // Validate input fields
+        if (!name || !email || !password) {
+            return res.status(400).json({ msg: "Please provide all required fields." });
+        }
+
         // Check if user exists
         let user = await User.findOne({ email });
         if (user) return res.status(400).json({ msg: "User already exists" });
@@ -17,11 +22,17 @@ router.post("/signup", async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // Create and save user
         user = new User({ name, email, password: hashedPassword });
         await user.save();
 
-        res.json({ msg: "User registered successfully!" });
+        // Generate JWT Token
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+        // Respond with success and token
+        res.status(201).json({ msg: "User registered successfully!", token });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ msg: "Server Error" });
     }
 });
@@ -30,6 +41,12 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        // Validate input fields
+        if (!email || !password) {
+            return res.status(400).json({ msg: "Please provide both email and password." });
+        }
+
         const user = await User.findOne({ email });
         if (!user) return res.status(400).json({ msg: "Invalid Credentials" });
 
@@ -39,8 +56,11 @@ router.post("/login", async (req, res) => {
 
         // Generate JWT Token
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+        // Respond with token
         res.json({ token });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ msg: "Server Error" });
     }
 });

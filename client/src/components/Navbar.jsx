@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext"; // 👈 Import useTheme
 
@@ -7,7 +7,9 @@ const Navbar = () => {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
-  // 👈 use context
+  
+  // Check if the user is logged in (token exists)
+  const isLoggedIn = localStorage.getItem("token");
 
   const linkClass = (path) =>
     `${location.pathname === path
@@ -20,7 +22,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-6 py-2 flex justify-between items-center">
         <Link
           to="/home"
-          className="text-xl font-extrabold tracking-tight flex items-center  bg-gradient-to-r from-[#001f3f] via-cyan-400 to-cyan-200 bg-clip-text text-transparent"
+          className="text-xl font-extrabold tracking-tight flex items-center bg-gradient-to-r from-[#001f3f] via-cyan-400 to-cyan-200 bg-clip-text text-transparent"
         >
           <img src="/animations/logo1.png" alt="" className="h-12" /> Expensync
         </Link>
@@ -32,8 +34,27 @@ const Navbar = () => {
               <li><Link to="/transactions" className={linkClass("/transactions")}>Transactions</Link></li>
               <li><Link to="/budget" className={linkClass("/budget")}>Budget</Link></li>
               <li><Link to="/charts" className={linkClass("/charts")}>Charts</Link></li>
-              <li><Link to="/login" className={linkClass("/login")}>Login</Link></li>
-              <li><Link to="/signup" className={linkClass("/signup")}>SignUp</Link></li>
+
+              {/* Conditionally render Login and Signup based on authentication */}
+              {!isLoggedIn ? (
+                <>
+                  <li><Link to="/login" className={linkClass("/login")}>Login</Link></li>
+                  <li><Link to="/signup" className={linkClass("/signup")}>SignUp</Link></li>
+                </>
+              ) : (
+                // Optionally, you can add a Logout button here
+                <li>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem("token");
+                      window.location.href = "/login"; // Redirect to login after logout
+                    }}
+                    className={linkClass("/login")}
+                  >
+                    Logout
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
 

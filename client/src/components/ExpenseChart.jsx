@@ -6,30 +6,30 @@ Chart.register(ArcElement, Tooltip, Legend);
 
 const ExpenseChart = ({ totalIncome, totalExpense }) => {
     // Commented out for now - for future use with props:
-    /*
+    
     const data = {
         labels: ["Income", "Expense"],
         datasets: [
             {
-                data: [totalIncome, totalExpense],
+                data: [totalIncome || 0, totalExpense || 0],
                 backgroundColor: ["#34D399", "#EF4444"],
                 borderWidth: 2,
             },
         ],
     };
-    */
+    
 
-    // Dummy static data:
-    const data = {
-        labels: ["Income", "Expense"],
-        datasets: [
-            {
-                data: [8000, 5500],
-                backgroundColor: ["#34D399", "#EF4444"],
-                borderWidth: 2,
-            },
-        ],
-    };
+    // // Dummy static data:
+    // const data = {
+    //     labels: ["Income", "Expense"],
+    //     datasets: [
+    //         {
+    //             data: [8000, 5500],
+    //             backgroundColor: ["#34D399", "#EF4444"],
+    //             borderWidth: 2,
+    //         },
+    //     ],
+    // };
 
     const options = {
         plugins: {

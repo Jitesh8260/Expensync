@@ -13,24 +13,27 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    localStorage.setItem("token", "dummy-token");
-    alert("Login Bypassed Successfully!");
-    navigate("/home");
-    // Uncomment to enable real login functionality
-    // const res = await fetch("http://localhost:5000/api/auth/login", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify(formData),
-    // });
-    // const data = await res.json();
-    // if (data.token) {
-    //   localStorage.setItem("token", data.token);
-    //   alert("Login Successful!");
-    //   navigate("/home");
-    // } else {
-    //   alert(data.msg);
-    // }
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+  
+      const data = await res.json();
+  
+      if (!res.ok) {
+        alert(data.msg || "Login failed");
+      } else {
+        localStorage.setItem("token", data.token);
+        alert("Login Successful!");
+        navigate("/home");
+      }
+    } catch (err) {
+      alert("Something went wrong.");
+    }
   };
+  
 
   return (
     <Layout>
@@ -57,6 +60,7 @@ const Login = () => {
                   type="email"
                   name="email"
                   placeholder="Email"
+                  required
                   onChange={handleChange}
                   className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-400 text-slate-800 dark:text-gray-100 bg-gray-100 dark:bg-slate-800 transition-transform duration-300 hover:scale-105"
                 />
@@ -64,6 +68,7 @@ const Login = () => {
                   type="password"
                   name="password"
                   placeholder="Password"
+                  required
                   onChange={handleChange}
                   className="w-full p-4 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-400 text-slate-800 dark:text-gray-100 bg-gray-100 dark:bg-slate-800 transition-transform duration-300 hover:scale-105"
                 />

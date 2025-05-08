@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { createTransaction } from "../api/api";
+import { createTransaction } from "../api/api"; // Importing the API function
 
 const tagsList = ["Essential", "Urgent", "Recurring", "Online", "Cash", "Credit"];
 
@@ -11,6 +11,7 @@ const AddTransaction = ({ userId, onSuccess }) => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
+  // Function to handle tag selection
   const handleTagChange = (tag) => {
     setSelectedTags((prevTags) =>
       prevTags.includes(tag)
@@ -19,6 +20,7 @@ const AddTransaction = ({ userId, onSuccess }) => {
     );
   };
 
+  // Function to handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !amount) return;
@@ -33,14 +35,18 @@ const AddTransaction = ({ userId, onSuccess }) => {
       userId,
     };
 
-    await createTransaction(transactionData);
-    setName("");
-    setAmount("");
-    setCategory("Others");
-    setNote("");
-    setSelectedTags([]);
-    setDate(new Date().toISOString().split("T")[0]);
-    onSuccess();
+    try {
+      await createTransaction(transactionData); // Calling the API function
+      setName(""); // Reset form fields after successful submission
+      setAmount("");
+      setCategory("Others");
+      setNote("");
+      setSelectedTags([]);
+      setDate(new Date().toISOString().split("T")[0]);
+      onSuccess(); // Trigger onSuccess callback (e.g., closing the form)
+    } catch (error) {
+      alert("Error creating transaction. Please try again.");
+    }
   };
 
   return (
