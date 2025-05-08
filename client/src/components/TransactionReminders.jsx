@@ -13,7 +13,7 @@ const TransactionReminders = () => {
         isRecurring: false,
     });
 
-    const API_URL = "http://localhost:5000/api/reminders"; // Update if different
+    const API_URL = "https://expensync-ex0w.onrender.com/api/reminders"; // Update if different
     const token = localStorage.getItem("token"); // Assuming JWT token is stored here
 
     // Fetch reminders on mount
