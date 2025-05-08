@@ -22,7 +22,7 @@ const CategoryBudgetGoals = ({ goals, setGoals }) => {
             }));
 
             const response = await axios.post(
-                "http://localhost:5000/api/category-goals/set",
+                "https://expensync-ex0w.onrender.com/api/category-goals/set",
                 { categoryGoals },
                 {
                     headers: {
@@ -94,12 +94,12 @@ const Budget = () => {
                 const token = localStorage.getItem("token");
 
                 const [summaryRes, goalsRes] = await Promise.all([
-                    axios.get("http://localhost:5000/api/summary/summary", {
+                    axios.get("https://expensync-ex0w.onrender.com/api/summary/summary", {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     }),
-                    axios.get("http://localhost:5000/api/category-goals/", {
+                    axios.get("https://expensync-ex0w.onrender.com/api/category-goals/", {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },

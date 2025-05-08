@@ -9,7 +9,7 @@ const AddDebtForm = ({ onDebtAdded }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const token = localStorage.getItem("token");
-    const API_URL = "http://localhost:5000/api/debts/create"; // Update if different
+    const API_URL = "https://expensync-ex0w.onrender.com/api/debts/create"; // Update if different
 
     const handleChange = (e) => {
         const { name, value } = e.target;

@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "https://expensync-ex0w.onrender.com/api";
 import axios from "axios";
 
 // Get token from localStorage

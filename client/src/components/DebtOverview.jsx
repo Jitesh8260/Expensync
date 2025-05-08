@@ -6,7 +6,7 @@ const DebtOverview = () => {
     const [debts, setDebts] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const token = localStorage.getItem("token");
-    const API_URL = "http://localhost:5000/api/debts";
+    const API_URL = "https://expensync-ex0w.onrender.com/api/debts";
 
     useEffect(() => {
         const fetchDebts = async () => {

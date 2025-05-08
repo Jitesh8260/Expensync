@@ -43,7 +43,7 @@ const Dashboard = () => {
         };
 
         // Fetch the transaction summary
-        axios.get("http://localhost:5000/api/summary/summary", { headers })
+        axios.get("https://expensync-ex0w.onrender.com/api/summary/summary", { headers })
             .then(response => {
                 const { totalIncome, totalExpenses } = response.data;
                 setTotalIncome(totalIncome);
@@ -52,7 +52,7 @@ const Dashboard = () => {
             .catch(err => console.error("Summary Error:", err));
 
         // Fetch all transactions for the user
-        axios.get("http://localhost:5000/api/transactions", { headers })
+        axios.get("https://expensync-ex0w.onrender.com/api/transactions", { headers })
             .then(res => {
                 setTransactions(res.data)
                 console.log("Without setTransactions",res.data)
@@ -61,7 +61,7 @@ const Dashboard = () => {
             .catch(err => console.error("Transaction Error:", err));
 
         // Fetch budget goals for the user
-        axios.get("http://localhost:5000/api/category-goals", { headers })
+        axios.get("https://expensync-ex0w.onrender.com/api/category-goals", { headers })
             .then(res => {
                 setBudgetGoals(res.data.categoryGoals),
                 console.log(res.data)
@@ -69,7 +69,7 @@ const Dashboard = () => {
             .catch(err => console.error("Budget Error:", err));
 
         // Fetch debts for the user
-        axios.get("http://localhost:5000/api/debts", { headers })
+        axios.get("https://expensync-ex0w.onrender.com/api/debts", { headers })
             .then(res => setDebts(res.data))
             .catch(err => console.error("Debt Error:", err));
 
