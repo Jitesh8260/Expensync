@@ -89,7 +89,7 @@ Open in browser: [http://localhost:3000](http://localhost:3000)
 ## 📊 Live Demo
 
 Check out the live version:  
-👉 [https://your-demo-link.com](willbeavailable)
+👉 [https://expensync.com](https://expensyncj17.vercel.app/)
 
 ---
 
