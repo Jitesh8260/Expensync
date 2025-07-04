@@ -7,7 +7,7 @@ const Navbar = () => {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
-  
+
   // Check if the user is logged in (token exists)
   const isLoggedIn = localStorage.getItem("token");
 
@@ -30,24 +30,26 @@ const Navbar = () => {
         <div className="flex items-center gap-4 md:gap-6">
           <div className={`md:flex md:items-center md:justify-center ${isOpen ? "block" : "hidden"} md:block`}>
             <ul className="flex flex-col md:flex-row gap-4 md:gap-8 px-4 py-4 md:py-2 text-base font-medium">
-              <li><Link to="/home" className={linkClass("/home")}>Home</Link></li>
-              <li><Link to="/transactions" className={linkClass("/transactions")}>Transactions</Link></li>
-              <li><Link to="/budget" className={linkClass("/budget")}>Budget</Link></li>
-              <li><Link to="/charts" className={linkClass("/charts")}>Charts</Link></li>
+              {isLoggedIn && (
+                <>
+                  <li><Link to="/home" className={linkClass("/home")}>Home</Link></li>
+                  <li><Link to="/transactions" className={linkClass("/transactions")}>Transactions</Link></li>
+                  <li><Link to="/budget" className={linkClass("/budget")}>Budget</Link></li>
+                  <li><Link to="/charts" className={linkClass("/charts")}>Charts</Link></li>
+                </>
+              )}
 
-              {/* Conditionally render Login and Signup based on authentication */}
               {!isLoggedIn ? (
                 <>
                   <li><Link to="/login" className={linkClass("/login")}>Login</Link></li>
                   <li><Link to="/signup" className={linkClass("/signup")}>SignUp</Link></li>
                 </>
               ) : (
-                // Optionally, you can add a Logout button here
                 <li>
                   <button
                     onClick={() => {
                       localStorage.removeItem("token");
-                      window.location.href = "/login"; // Redirect to login after logout
+                      window.location.href = "/login";
                     }}
                     className={linkClass("/login")}
                   >
