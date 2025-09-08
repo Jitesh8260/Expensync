@@ -29,7 +29,6 @@
 - **JWT** — Authentication via tokens  
 - **Chart.js** — Financial data visualization  
 - **Tailwind CSS** — Utility-first responsive styling  
-- **OpenWeather API** *(optional)* — Weather integration
 
 ---
 
