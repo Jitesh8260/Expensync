@@ -4,8 +4,7 @@
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
 ![Built With](https://img.shields.io/badge/Built%20with-MERN%20Stack-blue)
 
-**Expensync** is a full-stack personal finance tracker built with the **MERN stack**, **Tailwind CSS**, and **Chart.js**. This platform helps users track their **income**, **expenses**, and **budget goals**, offering real-time insights and beautiful visualizations for smarter financial decisions.
-
+**Expensync** Expensync is a full-stack personal finance tracker designed to help users manage their income, expenses, and budgets in a simple yet powerful way. The platform provides a real-time overview of financial health through dashboards, interactive charts, and category-wise transaction tracking. Users can easily add, edit, and delete transactions, set budget goals, and analyze spending patterns, all from a single intuitive interface.
 ---
 
 ## 🚀 Features
