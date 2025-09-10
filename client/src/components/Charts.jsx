@@ -3,7 +3,7 @@ import ExpenseChart from "./ExpenseChart";
 import ExpenseCategoryChart from "./ExpenseCategoryChart";
 import { motion } from "framer-motion";
 import Layout from "./Layout";
-import axios from "axios";
+import { getTransactions } from "../api/api"; // centralized API import
 
 const Charts = () => {
     const [transactions, setTransactions] = useState([]);
@@ -13,40 +13,34 @@ const Charts = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const token = localStorage.getItem("token");
-                const res = await axios.get("https://expensync-ex0w.onrender.com/api/transactions", {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-    
-                const data = res.data;
-                setTransactions(data);
-    
-                const income = data
+                const data = await getTransactions(); // centralized API call
+                const txns = Array.isArray(data) ? data : data?.transactions || [];
+
+                setTransactions(txns);
+
+                const income = txns
                     .filter((t) => t.amount > 0)
                     .reduce((acc, t) => acc + t.amount, 0);
-    
-                const expense = data
+
+                const expense = txns
                     .filter((t) => t.amount < 0)
                     .reduce((acc, t) => acc + t.amount, 0);
-    
+
                 setTotalIncome(income);
                 setTotalExpense(Math.abs(expense));
             } catch (err) {
                 console.error("Failed to fetch transactions:", err);
             }
         };
-    
+
         fetchData();
     }, []);
-    
 
     return (
         <Layout>
             <div className="rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-gradient-to-b from-slate-50 to-white dark:from-[#0c0f1c] dark:to-[#1a1d2e] p-6 sm:p-10 space-y-10">
                 <div className="text-center">
-                    <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-[#1E2A45] dark:text-white drop-shadow">
+                    <h2 className="text-4xl sm:text-5xl font-bold tracking-tight text-[#1E2A45] dark:text-white">
                         Financial Dashboard
                     </h2>
                     <p className="mt-4 text-lg sm:text-xl text-slate-700 dark:text-slate-400 max-w-2xl mx-auto">

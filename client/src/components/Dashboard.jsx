@@ -1,6 +1,5 @@
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import {
     ArrowDownRight,
     ArrowUpRight,
@@ -14,6 +13,9 @@ import DebtOverview from "./DebtOverview";
 import NetWorthCard from "./NetWorthCard";
 import Layout from "./Layout";
 
+// Centralized API imports
+import { getTransactions, fetchBudgetSummary, fetchCategoryGoals, fetchDebts } from "../api/api";
+
 const Dashboard = () => {
     const [userId, setUserId] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -22,71 +24,65 @@ const Dashboard = () => {
     const [transactions, setTransactions] = useState([]);
     const [budgetGoals, setBudgetGoals] = useState([]);
     const [debts, setDebts] = useState([]);
+    
     const totalBalance = totalIncome - totalExpense;
     const budgetUsed = totalIncome > 0 ? (totalExpense / totalIncome) * 100 : 0;
 
     // Decode token and set userId
-    const token = localStorage.getItem("token"); // or wherever you store it
+    const token = localStorage.getItem("token");
     useEffect(() => {
         if (token) {
-            const decodedToken = jwtDecode(token);  // Decode the token
-            setUserId(decodedToken.userId); // Set userId from the token
+            const decodedToken = jwtDecode(token);
+            setUserId(decodedToken.userId);
         }
-    }, [token]);  // Runs only once when token is available
+    }, [token]);
 
-    // Fetch data once userId is available
+    // Fetch all required data
     useEffect(() => {
         if (!userId || !token) return;
 
-        const headers = {
-            Authorization: `Bearer ${token}`
+        const fetchData = async () => {
+            try {
+                const [summary, txs, goals, debtsData] = await Promise.all([
+                    fetchBudgetSummary(),
+                    getTransactions(),
+                    fetchCategoryGoals(),
+                    fetchDebts()
+                ]);
+
+                // Set summary data
+                setTotalIncome(summary.totalIncome);
+                setTotalExpense(summary.totalExpenses);
+
+                // Set transactions
+                setTransactions(txs.transactions || []);
+
+                // Set budget goals
+                setBudgetGoals(goals.categoryGoals || []);
+
+                // Set debts
+                setDebts(debtsData || []);
+            } catch (err) {
+                console.error("Dashboard fetch error:", err);
+            }
         };
 
-        // Fetch the transaction summary
-        axios.get("https://expensync-ex0w.onrender.com/api/summary/summary", { headers })
-            .then(response => {
-                const { totalIncome, totalExpenses } = response.data;
-                setTotalIncome(totalIncome);
-                setTotalExpense(totalExpenses); // Fix here
-            })
-            .catch(err => console.error("Summary Error:", err));
-
-        // Fetch all transactions for the user
-        axios.get("https://expensync-ex0w.onrender.com/api/transactions", { headers })
-            .then(res => {
-                setTransactions(res.data)
-                console.log("Without setTransactions",res.data)
-                console.log("With setTransactions ",transactions)
-            })
-            .catch(err => console.error("Transaction Error:", err));
-
-        // Fetch budget goals for the user
-        axios.get("https://expensync-ex0w.onrender.com/api/category-goals", { headers })
-            .then(res => {
-                setBudgetGoals(res.data.categoryGoals),
-                console.log(res.data)
-            })
-            .catch(err => console.error("Budget Error:", err));
-
-        // Fetch debts for the user
-        axios.get("https://expensync-ex0w.onrender.com/api/debts", { headers })
-            .then(res => setDebts(res.data))
-            .catch(err => console.error("Debt Error:", err));
-
-    }, [userId, token]); // Run effect when userId or token changes
+        fetchData();
+    }, [userId, token]);
 
     // Calculate total spent per category
     const calculateSpentPerCategory = (transactions) => {
-        const spentPerCategory = {};
-        transactions.forEach(tx => {
-            if (spentPerCategory[tx.category]) {
-                spentPerCategory[tx.category] += tx.amount;
-            } else {
-                spentPerCategory[tx.category] = tx.amount;
-            }
-        });
-        return spentPerCategory;
-    };
+    if (!Array.isArray(transactions)) return {}; // safety check
+    const spentPerCategory = {};
+    transactions.forEach(tx => {
+        if (spentPerCategory[tx.category]) {
+            spentPerCategory[tx.category] += tx.amount;
+        } else {
+            spentPerCategory[tx.category] = tx.amount;
+        }
+    });
+    return spentPerCategory;
+};
 
     // Merge budget goals with spent data
     const budgetGoalsWithSpent = budgetGoals.map(goal => {
@@ -96,13 +92,13 @@ const Dashboard = () => {
             spent
         };
     });
-    console.log("Transactions for Expense Chart: ", transactions);
-    
+
     return (
         <Layout>
             <div className={`p-8 transition-all duration-500 ease-in-out relative ${showModal ? "blur-sm pointer-events-none" : ""} 
                 bg-gradient-to-b from-slate-50 to-white dark:from-[#0c0f1c] dark:to-[#1a1d2e]
                 text-slate-800 dark:text-white rounded-3xl shadow-xl sm:px-10`}>
+                
                 <h2 className="text-4xl font-extrabold mb-12 text-center md:text-left tracking-tight">
                     Your Financial Overview
                 </h2>

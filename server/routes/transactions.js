@@ -16,5 +16,10 @@ router.get("/user", authMiddleware, transactionController.getTransactions);  // 
 // Get transaction summary by user ID (protected)
 router.get("/summary", authMiddleware, transactionController.getTransactionSummary);  // Use req.user for logged-in user's summary
 
+// Delete transaction by ID (protected)
+router.delete("/:id", authMiddleware, transactionController.deleteTransaction);
+
+
+
 
 module.exports = router;

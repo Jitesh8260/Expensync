@@ -7,16 +7,20 @@ const BudgetGoalProgress = ({ goals = [] }) => {
         return <div className="text-red-500">Error: Invalid goals data</div>;
     }
 
+    // 🛑 Savings ko filter out karo
+    const filteredGoals = goals.filter(
+        (goal) => goal.category?.toLowerCase() !== "savings"
+    );
+
     return (
         <div className="mt-5">
             <h4 className="text-lg font-semibold mb-4">Budget Goal Progress</h4>
             <div className="space-y-4">
-                {goals.map(({ category, goal, spent }, idx) => {
-                    // Calculate the absolute value of spent for percentage calculation
+                {filteredGoals.map(({ category, goal, spent }, idx) => {
                     const absoluteSpent = Math.abs(spent);
                     const percentage = Math.min((absoluteSpent / goal) * 100, 100);
-                    const isOver = spent < 0 && absoluteSpent > goal; // Over budget if spent is negative and exceeds goal
-                    const isSurplus = spent > 0; // Surplus if spent is positive
+                    const isOver = spent < 0 && absoluteSpent > goal;
+                    const isSurplus = spent > 0;
 
                     return (
                         <div key={idx}>
@@ -26,7 +30,13 @@ const BudgetGoalProgress = ({ goals = [] }) => {
                             </div>
                             <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3">
                                 <div
-                                    className={`h-3 rounded-full transition-all duration-700 ease-out ${isOver ? "bg-red-500" : isSurplus ? "bg-green-500" : "bg-yellow-500"}`}
+                                    className={`h-3 rounded-full transition-all duration-700 ease-out ${
+                                        isOver
+                                            ? "bg-red-500"
+                                            : isSurplus
+                                            ? "bg-green-500"
+                                            : "bg-yellow-500"
+                                    }`}
                                     style={{ width: `${percentage}%` }}
                                 ></div>
                             </div>

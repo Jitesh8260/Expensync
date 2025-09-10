@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { createTransaction } from "../api/api"; // Importing the API function
+import { useState } from "react";
+import { createTransaction } from "../api/api"; 
 
 const tagsList = ["Essential", "Urgent", "Recurring", "Online", "Cash", "Credit"];
 
@@ -10,8 +10,10 @@ const AddTransaction = ({ userId, onSuccess }) => {
   const [note, setNote] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // Function to handle tag selection
+  // ✅ Toggle tags
   const handleTagChange = (tag) => {
     setSelectedTags((prevTags) =>
       prevTags.includes(tag)
@@ -20,10 +22,13 @@ const AddTransaction = ({ userId, onSuccess }) => {
     );
   };
 
-  // Function to handle form submission
+  // ✅ Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !amount) return;
+    if (!name || !amount) {
+      setError("Please fill all required fields");
+      return;
+    }
 
     const transactionData = {
       title: name,
@@ -35,17 +40,22 @@ const AddTransaction = ({ userId, onSuccess }) => {
       userId,
     };
 
+    setLoading(true);
+    setError("");
+
     try {
-      await createTransaction(transactionData); // Calling the API function
-      setName(""); // Reset form fields after successful submission
+      await createTransaction(transactionData); // centralized API call
+      setName("");
       setAmount("");
       setCategory("Others");
       setNote("");
       setSelectedTags([]);
       setDate(new Date().toISOString().split("T")[0]);
-      onSuccess(); // Trigger onSuccess callback (e.g., closing the form)
-    } catch (error) {
-      alert("Error creating transaction. Please try again.");
+      onSuccess(); // Close form or refresh list
+    } catch (err) {
+      setError("Error creating transaction. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -162,13 +172,17 @@ const AddTransaction = ({ userId, onSuccess }) => {
           </div>
         </div>
 
+        {/* Error message */}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+
         {/* Submit */}
         <div>
           <button
             type="submit"
             className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-lg shadow-md hover:from-blue-700 hover:to-indigo-700 transition-all duration-300"
+            disabled={loading}
           >
-            ➕ Add Transaction
+            {loading ? "Saving..." : "➕ Add Transaction"}
           </button>
         </div>
       </form>

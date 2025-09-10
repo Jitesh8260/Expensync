@@ -1,26 +1,23 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 import AddDebtForm from "./AddDebtForm";
+import { fetchDebts } from "../api/api"; // centralized api.js function
+import { deleteDebt } from "../api/api"; // add this function in api.js
 
 const DebtOverview = () => {
     const [debts, setDebts] = useState([]);
     const [showForm, setShowForm] = useState(false);
-    const token = localStorage.getItem("token");
-    const API_URL = "https://expensync-ex0w.onrender.com/api/debts";
 
     useEffect(() => {
-        const fetchDebts = async () => {
+        const getDebts = async () => {
             try {
-                const res = await axios.get(API_URL, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                setDebts(res.data);
+                const data = await fetchDebts(); // centralized API call
+                setDebts(data);
             } catch (err) {
                 console.error("Error fetching debts:", err);
             }
         };
-        fetchDebts();
-    }, [token]);
+        getDebts();
+    }, []);
 
     const totalDebt = debts.reduce((acc, curr) => acc + curr.amount, 0);
 
@@ -28,15 +25,12 @@ const DebtOverview = () => {
         setDebts((prevDebts) => [...prevDebts, newDebt]);
     };
 
-    // ✅ Handle Delete
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`${API_URL}/${id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            await deleteDebt(id); // centralized API call
             setDebts((prevDebts) => prevDebts.filter((debt) => debt._id !== id));
-        } catch (error) {
-            console.error("Error deleting debt:", error);
+        } catch (err) {
+            console.error("Error deleting debt:", err);
         }
     };
 

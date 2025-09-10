@@ -1,44 +1,65 @@
+const mongoose = require("mongoose");
 const CategoryBudgetGoal = require("../models/CategoryBudgetGoal");
-const Transaction = require("../models/Transaction"); // Assuming your Transaction model has a type field to distinguish income/expense
+const Transaction = require("../models/Transaction");
 
-// Get Budget Summary for the user
+// Get Dashboard Summary for the user
 const getBudgetSummary = async (req, res) => {
     try {
-        // Fetch all category goals for the user
-        const goals = await CategoryBudgetGoal.find({ user: req.user });
+        // convert userId string to ObjectId
+        const userId = new mongoose.Types.ObjectId(req.user);
 
-        // Calculate Total Budget (sum of all category goals)
-        const totalBudget = goals.reduce((acc, goal) => acc + goal.goal, 0);
+        // 1️⃣ Total Budget (sum of all category goals)
+        const budgetAgg = await CategoryBudgetGoal.aggregate([
+            { $match: { user: userId } },
+            { $group: { _id: null, totalBudget: { $sum: "$goal" } } }
+        ]);
+        const totalBudget = budgetAgg[0]?.totalBudget || 0;
 
-        // Fetch all transactions (expenses and income) for the user
-        const transactions = await Transaction.find({ userId: req.user });
+        // 2️⃣ Total Income & Expenses aggregation
+        const txAgg = await Transaction.aggregate([
+            { $match: { userId } },
+            {
+                $group: {
+                    _id: null,
+                    totalIncome: {
+                        $sum: { $cond: [{ $gt: ["$amount", 0] }, "$amount", 0] }
+                    },
+                    totalExpenses: {
+                        $sum: { $cond: [{ $lt: ["$amount", 0] }, { $abs: "$amount" }, 0] }
+                    },
+                    totalCount: { $sum: 1 }
+                }
+            }
+        ]);
 
-        // Calculate Total Expenses (sum of all expense transactions)
-        const totalExpenses = transactions
-            .filter((transaction) => transaction.amount < 0)
-            .reduce((acc, transaction) => acc + Math.abs(transaction.amount), 0); // expenses are negative, make them positive
+        const totalIncome = txAgg?.[0]?.totalIncome || 0;
+        const totalExpenses = txAgg?.[0]?.totalExpenses || 0;
+        const totalTransactions = txAgg?.[0]?.totalCount || 0;
 
-        const totalIncome = transactions
-            .filter((transaction) => transaction.amount > 0)
-            .reduce((acc, transaction) => acc + transaction.amount, 0);
+        // 3️⃣ Recent 3 transactions (descending by date)
+        const recentTransactions = await Transaction.find({ userId })
+            .sort({ createdAt: -1 })
+            .limit(3)
+            .lean();
 
-
-        // Calculate Savings (Total Budget - Total Expenses)
+        // 4️⃣ Savings
         const savings = totalBudget - totalExpenses;
 
-        // Respond with the summary data
+        // 5️⃣ Response
         res.status(200).json({
             totalIncome,
             totalExpenses,
             totalBudget,
             savings,
+            recentTransactions,
+            totalTransactions
         });
     } catch (error) {
-        console.error("Error fetching budget summary:", error);
-        res.status(500).json({ message: "Error fetching summary", error: error.message });
+        console.error("Error fetching dashboard summary:", error);
+        res.status(500).json({ message: "Error fetching dashboard summary", error: error.message });
     }
 };
 
 module.exports = {
-    getBudgetSummary,
+    getBudgetSummary
 };

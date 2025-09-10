@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Player } from '@lottiefiles/react-lottie-player';
+import { Player } from "@lottiefiles/react-lottie-player";
 import Layout from "../components/Layout";
+import { loginUser } from "../api/api";
+import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,42 +16,25 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("https://expensync-ex0w.onrender.com/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-  
-      const data = await res.json();
-  
-      if (!res.ok) {
-        alert(data.msg || "Login failed");
-      } else {
-        localStorage.setItem("token", data.token);
-        alert("Login Successful!");
-        navigate("/home");
-      }
+      await loginUser(formData);
+      navigate("/home");
     } catch (err) {
-      alert("Something went wrong.");
+      console.error("Login failed", err);
     }
   };
-  
 
   return (
     <Layout>
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-white dark:from-[#0c0f1c] dark:to-[#1a1d2e] p-4 transition-colors duration-300">
         <div className="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl shadow-xl overflow-hidden md:flex border border-slate-200 dark:border-slate-800 hover:shadow-2xl transition-shadow duration-300">
-          {/* Animation Section */}
           <div className="md:w-5/12 bg-[#001f3f] dark:bg-blue-900 p-6 flex items-center justify-center rounded-tl-3xl rounded-bl-3xl">
             <Player
               autoplay
               loop
               src="/animations/login.json"
-              style={{ height: '300px', width: '300px' }}
+              style={{ height: "300px", width: "300px" }}
             />
           </div>
-
-          {/* Form Section */}
           <div className="md:w-7/12 p-8 md:p-10 flex items-center justify-center bg-white dark:bg-slate-900">
             <div className="w-full">
               <h2 className="text-3xl md:text-4xl font-semibold text-slate-800 dark:text-gray-100 mb-6 text-center transition-all duration-300 transform hover:scale-105">

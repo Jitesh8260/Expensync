@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
+import { fetchReminders, addReminder, deleteReminder } from "../api/api"; // centralized API
 
 const TransactionReminders = () => {
     const [reminders, setReminders] = useState([]);
@@ -13,23 +13,18 @@ const TransactionReminders = () => {
         isRecurring: false,
     });
 
-    const API_URL = "https://expensync-ex0w.onrender.com/api/reminders"; // Update if different
-    const token = localStorage.getItem("token"); // Assuming JWT token is stored here
-
     // Fetch reminders on mount
     useEffect(() => {
-        const fetchReminders = async () => {
+        const getReminders = async () => {
             try {
-                const res = await axios.get(API_URL, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                setReminders(res.data);
+                const data = await fetchReminders();
+                setReminders(data);
             } catch (err) {
                 console.error("Error fetching reminders:", err);
             }
         };
-        fetchReminders();
-    }, [token]);
+        getReminders();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -42,12 +37,8 @@ const TransactionReminders = () => {
     const handleAddReminder = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post(
-                `${API_URL}/create`,
-                form,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            setReminders((prev) => [...prev, res.data]);
+            const newReminder = await addReminder(form);
+            setReminders((prev) => [...prev, newReminder]);
             setForm({
                 title: "",
                 amount: "",
@@ -63,9 +54,7 @@ const TransactionReminders = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`${API_URL}/${id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            await deleteReminder(id);
             setReminders((prev) => prev.filter((r) => r._id !== id));
         } catch (err) {
             console.error("Error deleting reminder:", err);

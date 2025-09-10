@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext"; // 👈 Import useTheme
+import { logoutUser } from "../api/api"; // 👈 Centralized logout with toast
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,8 +49,8 @@ const Navbar = () => {
                 <li>
                   <button
                     onClick={() => {
-                      localStorage.removeItem("token");
-                      window.location.href = "/login";
+                      logoutUser(); // centralized logout
+                      window.location.href = "/login"; // redirect to login
                     }}
                     className={linkClass("/login")}
                   >

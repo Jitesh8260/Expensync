@@ -1,0 +1,9 @@
+// src/utils/loaderControl.js
+let setLoaderFn = () => {};
+
+export const loaderControl = {
+  setLoading: (val) => setLoaderFn(val),
+  register: (fn) => {
+    setLoaderFn = fn;
+  },
+};

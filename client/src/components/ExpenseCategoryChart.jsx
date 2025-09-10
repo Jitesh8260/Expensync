@@ -1,34 +1,21 @@
-import React from "react";
 import { Doughnut } from "react-chartjs-2";
 import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
 
 Chart.register(ArcElement, Tooltip, Legend);
 
 const ExpenseCategoryChart = ({ transactions = [] }) => {
-    // Original dynamic logic (future use):
-    if (!Array.isArray(transactions)) {
-        console.error("Expected transactions to be an array, but received:", transactions);
-        return null;
-    }
+    // Ensure safe array extraction
+    const safeTxns = Array.isArray(transactions)
+        ? transactions
+        : transactions?.transactions || [];
 
-    const categoryTotals = transactions.reduce((acc, txn) => {
+    const categoryTotals = safeTxns.reduce((acc, txn) => {
         if (txn.amount < 0) {
             const category = txn.category || "Other";
             acc[category] = (acc[category] || 0) + Math.abs(txn.amount);
         }
         return acc;
     }, {});
-    
-
-    // Dummy static data for now:
-    // const categoryTotals = {
-    //     Food: 1200,
-    //     Travel: 800,
-    //     Shopping: 500,
-    //     Rent: 3000,
-    //     Entertainment: 600,
-    //     Other: 400,
-    // };
 
     const data = {
         labels: Object.keys(categoryTotals),

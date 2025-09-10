@@ -15,6 +15,10 @@ app.get("/", (req, res) => {
   res.send("API running 🎯");
 });
 
+app.get("/api/v1", (req, res) => {
+  res.send("Backend is running!");
+});
+
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI)
@@ -22,13 +26,14 @@ mongoose
   .catch((err) => console.error("❌ MongoDB error:", err));
 
 // API Routes
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/transactions", require("./routes/transactions"));
-app.use("/api/budgets", require("./routes/budgets"));
-app.use("/api/category-goals",require("./routes/categoryBudgetRoutes"));
-app.use("/api/debts", require("./routes/debts")); 
-app.use("/api/summary", require("./routes/summary"));     
-app.use("/api/reminders", require("./routes/reminders")); // Added route for reminders
+app.use("/api/v1/auth", require("./routes/auth"));
+app.use("/api/v1/transactions", require("./routes/transactions"));
+app.use("/api/v1/budgets", require("./routes/budgets"));
+app.use("/api/v1/category-goals", require("./routes/categoryBudgetRoutes"));
+app.use("/api/v1/debts", require("./routes/debts"));
+app.use("/api/v1/summary", require("./routes/summary"));     
+app.use("/api/v1/reminders", require("./routes/reminders"));
+
 
 // Start Server
 app.listen(PORT, () => {

@@ -5,6 +5,7 @@ const categoryBudgetGoalSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
+        index: true, 
     },
     category: {
         type: String,
@@ -15,5 +16,7 @@ const categoryBudgetGoalSchema = new mongoose.Schema({
         required: true,
     },
 }, { timestamps: true });
+
+categoryBudgetGoalSchema.index({ user: 1, category: 1 });
 
 module.exports = mongoose.model("CategoryBudgetGoal", categoryBudgetGoalSchema);

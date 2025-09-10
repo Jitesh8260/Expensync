@@ -6,7 +6,14 @@ export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     const stored = localStorage.getItem("theme");
     if (stored) return stored;
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const defaultTheme = prefersDark ? "dark" : "light";
+
+    // ✅ Pehli hi render pe localStorage me dal do
+    localStorage.setItem("theme", defaultTheme);
+
+    return defaultTheme;
   });
 
   useEffect(() => {
@@ -14,10 +21,9 @@ export const ThemeProvider = ({ children }) => {
     document.documentElement.classList.toggle("dark", theme === "dark"); // for Tailwind
     localStorage.setItem("theme", theme);
   }, [theme]);
-  
 
   const toggleTheme = () => {
-    setTheme(prev => (prev === "dark" ? "light" : "dark"));
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
   return (
@@ -28,3 +34,5 @@ export const ThemeProvider = ({ children }) => {
 };
 
 export const useTheme = () => useContext(ThemeContext);
+
+

@@ -1,12 +1,12 @@
 import styles from "../style";
 import { robot } from "../assets"; // Replace with a relevant Expensync image later
 import GetStarted from "./GetStarted";
-import { discount } from "../assets";
+
 
 const Hero = () => {
   return (
-    <section id="home" className={`flex md:flex-row flex-col ${styles.paddingY}`}>
-      <div className={`flex-1 ${styles.flexStart} flex-col xl:px-0 sm:px-16 px-6`}>
+    <section id="home" className={`flex md:flex-row flex-col ${styles.paddingY} w-full min-h-screen`}>
+      <div className={`flex-1 ${styles.flexStart} flex-col xl:px-16 sm:px-16 px-6`}>
         {/* Promo Banner */}
         <div className="flex flex-row items-center py-[6px] px-4 bg-[rgba(0,246,255,0.1)] dark:bg-[rgba(0,246,255,0.2)] rounded-[10px] mb-2">
           <p className={`${styles.paragraph} ml-2 text-gray-900 dark:text-gray-100`}>
