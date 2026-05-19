@@ -24,6 +24,9 @@ const TransactionReminders = () => {
             }
         };
         getReminders();
+
+        window.addEventListener("expensync_data_refresh", getReminders);
+        return () => window.removeEventListener("expensync_data_refresh", getReminders);
     }, []);
 
     const handleChange = (e) => {
@@ -62,7 +65,7 @@ const TransactionReminders = () => {
     };
 
     return (
-        <div className="mt-10 bg-gradient-to-br from-slate-50 to-white dark:from-[#0c0f1c] dark:to-[#1a1d2e] border border-slate-200 dark:border-slate-700 p-6 sm:p-8 md:p-10 rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.12)] transition-all overflow-x-hidden">
+        <div className="bg-gradient-to-br from-slate-50 to-white dark:from-[#0c0f1c] dark:to-[#1a1d2e] border border-slate-200 dark:border-slate-700 p-6 sm:p-8 md:p-10 rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.12)] transition-all overflow-x-hidden">
             <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-6 tracking-tight">
                 ⏰ Transaction Reminders
             </h3>

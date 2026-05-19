@@ -6,7 +6,7 @@ const TransactionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId, 
       ref: "User", 
       required: true, 
-      index: true // 🔥 fast queries per user
+      index: true 
     },
 
     title: { 
@@ -26,10 +26,9 @@ const TransactionSchema = new mongoose.Schema(
         "Food", 
         "Entertainment", 
         "Travel", 
-        "Shopping", 
-        "Savings", 
-        "Others", 
-        "Utilities"
+        "Utilities",
+        "Income", 
+        "Others"
       ], 
       default: "Others", 
       trim: true 
@@ -51,6 +50,27 @@ const TransactionSchema = new mongoose.Schema(
       default: Date.now, 
       index: true // 🔥 useful for sorting/filtering
     },
+
+    // AI Metadata Fields (Flat Structure)
+    source: {
+      type: String,
+      enum: ["manual", "nlp", "ocr", "recurring"],
+      default: "manual",
+      trim: true
+    },
+    
+    confidenceScore: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: 100 // Manual entries have 100% confidence
+    },
+
+    merchant: {
+      type: String,
+      trim: true,
+      default: ""
+    }
   },
   { 
     timestamps: true 

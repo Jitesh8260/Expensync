@@ -17,6 +17,9 @@ const DebtOverview = () => {
             }
         };
         getDebts();
+
+        window.addEventListener("expensync_data_refresh", getDebts);
+        return () => window.removeEventListener("expensync_data_refresh", getDebts);
     }, []);
 
     const totalDebt = debts.reduce((acc, curr) => acc + curr.amount, 0);
@@ -37,13 +40,13 @@ const DebtOverview = () => {
     return (
         <div className="mt-12">
             <h4 className="text-lg font-semibold mb-4">Debt Overview</h4>
-            <div className="bg-red-50 dark:bg-slate-800 p-4 rounded-xl shadow border dark:border-slate-700">
+            <div className="bg-red-50/90 dark:bg-slate-900/80 p-6 rounded-2xl shadow-md shadow-slate-200/50 dark:shadow-none border border-red-200 dark:border-slate-700/80">
                 <p className="text-lg font-bold text-red-500 mb-4">Total Debt: ₹{totalDebt.toLocaleString()}</p>
                 <ul className="space-y-2">
                     {debts.map((debt) => (
                         <li
                             key={debt._id}
-                            className="flex justify-between items-center bg-white dark:bg-slate-700 px-4 py-2 rounded shadow"
+                            className="flex justify-between items-center bg-white dark:bg-slate-800 px-4 py-3 rounded-xl shadow-sm shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700/50"
                         >
                             <div>
                                 <p className="font-medium">{debt.name}</p>

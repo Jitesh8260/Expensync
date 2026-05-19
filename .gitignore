@@ -33,3 +33,35 @@ server/.env
 .next/
 out/
 build/
+
+# ML / Python specific
+ml-service/venv/
+ml-service/.env
+*.pkl
+*metadata.json
+__pycache__/
+*.pyc
+
+# Local server uploads
+server/uploads/*
+!server/uploads/.gitkeep
+
+
+# Coverage
+coverage/
+
+# Vercel
+.vercel
+
+# Render / temp
+tmp/
+temp/
+
+# Mac/Linux
+Thumbs.db
+
+# Python cache
+.pytest_cache/
+
+# Optional
+coverage-final.json

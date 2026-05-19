@@ -1,4 +1,6 @@
 const Transaction = require("../models/Transaction");
+const adaptiveMemoryService = require("../services/adaptiveMemoryService");
+const merchantService = require("../services/merchantService");
 
 // Create a new transaction
 exports.createTransaction = async (req, res) => {
@@ -21,6 +23,25 @@ exports.createTransaction = async (req, res) => {
         });
 
         const savedTransaction = await newTransaction.save();
+
+        // Adaptive Memory: learn user's merchant→category preference
+        if (title && category) {
+            const merchantInfo = merchantService.normalizeMerchant(title.trim());
+            if (merchantInfo.canonicalMerchant) {
+                const contextHint = merchantService.detectContextHint(
+                    (note || "") + " " + (title || ""),
+                    merchantInfo.canonicalMerchant
+                );
+                await adaptiveMemoryService.recordCorrection(
+                    userId,
+                    title.trim(),
+                    merchantInfo.canonicalMerchant,
+                    category.trim(),
+                    contextHint
+                );
+            }
+        }
+
         res.status(201).json(savedTransaction);
     } catch (error) {
         console.error('Error creating transaction:', error);
@@ -53,7 +74,7 @@ exports.getTransactions = async (req, res) => {
     }
 
     const transactions = await Transaction.find(query)
-      .sort({ date: -1 }) // latest first
+      .sort({ date: -1, _id: -1 }) // latest first with stable tie-breaker
       .skip(skip)
       .limit(Number(limit))
       .lean(); // ⚡ light payload
@@ -107,7 +128,7 @@ exports.deleteTransaction = async (req, res) => {
             return res.status(404).json({ message: "Transaction not found or unauthorized" });
         }
 
-        const transactions = await Transaction.find({ userId }).sort({ date: -1 });
+        const transactions = await Transaction.find({ userId }).sort({ date: -1, _id: -1 });
         res.status(200).json({
             message: "Transaction deleted successfully",
             transactions,
@@ -115,5 +136,19 @@ exports.deleteTransaction = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error deleting transaction", error: error.message });
+    }
+};
+
+// Get all transactions for analytics (NO PAGINATION)
+exports.getAllTransactionsForAnalytics = async (req, res) => {
+    try {
+        const transactions = await Transaction.find({ userId: req.user })
+            .sort({ date: -1, _id: -1 })
+            .lean();
+        
+        res.status(200).json(transactions);
+    } catch (error) {
+        console.error("Error fetching all transactions for analytics:", error);
+        res.status(500).json({ msg: "Failed to fetch analytics transactions" });
     }
 };

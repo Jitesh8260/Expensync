@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
-import { ArrowDownCircle, ArrowUpCircle, MinusCircle } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, MinusCircle, Repeat, AlertTriangle, Sparkles } from "lucide-react";
 import TransactionReminders from "./TransactionReminders";
 import Layout from "./Layout";
-import { getTransactions, deleteTransaction } from "../api/api";
+import { getTransactions, deleteTransaction, getFinancialInsights } from "../api/api";
 
 const ConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
   if (!isOpen) return null;
@@ -43,6 +43,7 @@ const Transactions = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [insights, setInsights] = useState(null);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -80,11 +81,7 @@ const Transactions = () => {
     }
   };
 
-  // ✅ Initial load (mount pe ek hi call)
-  useEffect(() => {
-    fetchTransactions(1, true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Removed redundant on-mount useEffect since search/filter hook runs on mount.
 
   // ✅ Re-fetch on search/filter change (debounced)
   useEffect(() => {
@@ -93,6 +90,27 @@ const Transactions = () => {
     }, 500);
 
     return () => clearTimeout(delayDebounce);
+  }, [search, filter]);
+
+  // ✅ Fetch AI Financial Insights & Handle Global Data Refresh
+  useEffect(() => {
+    const fetchInsights = async () => {
+      try {
+        const mlInsights = await getFinancialInsights(6, true);
+        setInsights(mlInsights);
+      } catch (err) {
+        console.error("Failed to fetch insights:", err);
+      }
+    };
+    fetchInsights();
+
+    const handleRefresh = () => {
+      fetchTransactions(1, true);
+      fetchInsights();
+    };
+
+    window.addEventListener("expensync_data_refresh", handleRefresh);
+    return () => window.removeEventListener("expensync_data_refresh", handleRefresh);
   }, [search, filter]);
 
   // ✅ Infinite scroll
@@ -179,7 +197,7 @@ const Transactions = () => {
 
             <ul
               ref={listRef}
-              className="space-y-5 max-h-[532px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600"
+              className="space-y-5 max-h-[880px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600"
             >
               {transactions.map((txn) => (
                 <li
@@ -188,14 +206,27 @@ const Transactions = () => {
                 >
                   <div className="flex items-center gap-4">
                     {txn.amount < 0 ? (
-                      <ArrowDownCircle className="text-red-500" size={26} />
+                      <ArrowDownCircle className="text-red-500 flex-shrink-0" size={26} />
                     ) : (
-                      <ArrowUpCircle className="text-green-500" size={26} />
+                      <ArrowUpCircle className="text-green-500 flex-shrink-0" size={26} />
                     )}
                     <div>
-                      <p className="text-lg font-semibold text-slate-800 dark:text-white">
-                        {txn.title}
-                      </p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-lg font-semibold text-slate-800 dark:text-white">
+                          {txn.title}
+                        </p>
+                        {/* Inline AI Badges */}
+                        {insights?.recurringExpenses?.some(r => r.merchant?.toLowerCase() === txn.title?.toLowerCase() || txn.title?.toLowerCase()?.includes(r.merchant?.toLowerCase())) && (
+                          <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 text-xs font-bold border border-blue-300 dark:border-blue-800/80 flex items-center gap-1 shadow-sm" title="AI detected recurring subscription">
+                            <Repeat size={12} /> Recurring
+                          </span>
+                        )}
+                        {insights?.anomalies?.some(a => a.transactionId === txn._id) && (
+                          <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text.amber-300 text-xs font-bold border border-amber-300 dark:border-amber-800/80 flex items-center gap-1 shadow-sm" title="AI detected unusual spending amount">
+                            <AlertTriangle size={12} /> Unusual Amount
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-slate-500 dark:text-slate-400">
                         {txn.category}
                       </p>
@@ -259,6 +290,76 @@ const Transactions = () => {
                   <span className="font-semibold">🔴 Net Balance:</span> ₹{net}
                 </li>
               </ul>
+            </div>
+
+            {/* Merchant Insights Sidebar */}
+            <div className="bg-gradient-to-b from-white to-slate-50/90 dark:from-[#0c0f1c] dark:to-[#1a1d2e] p-6 sm:p-8 md:p-10 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-700/80 h-fit relative overflow-hidden backdrop-blur-xl transition-all">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/10 dark:bg-purple-500/20 rounded-full blur-3xl pointer-events-none -mr-10 -mt-10"></div>
+              <div className="flex items-center gap-4 mb-8 border-b border-slate-200 dark:border-slate-700 pb-6">
+                <div className="p-3 bg-purple-500/10 dark:bg-purple-500/20 rounded-2xl border border-purple-500/20">
+                  <AlertTriangle className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Merchant Insights</h3>
+                  <p className="text-xs font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wider mt-0.5">Spending Irregularities & Outliers</p>
+                </div>
+              </div>
+
+              {insights ? (
+                <div className="space-y-8">
+                  {/* Recent Anomalies */}
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2">
+                      <AlertTriangle size={16} className="text-amber-500" /> Unusual Spending Outliers
+                    </h4>
+                    {insights.anomalies?.length > 0 ? (
+                      <ul className="space-y-3">
+                        {insights.anomalies.map((anom, idx) => (
+                          <li key={idx} className="p-5 rounded-2xl bg-white dark:bg-slate-800/60 backdrop-blur-md border border-slate-200/80 dark:border-slate-700 shadow-md shadow-slate-200/50 dark:shadow-none hover:scale-[1.01] transition-all duration-300 flex flex-col gap-3">
+                            <div className="flex justify-between items-start gap-2">
+                              <div>
+                                <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                                  <AlertTriangle size={15} className="text-amber-500 flex-shrink-0" />
+                                  <span className="font-bold text-slate-800 dark:text-white text-sm tracking-tight">
+                                    Large {anom.category || "Expense"} Detected
+                                  </span>
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border shadow-sm ${
+                                    anom.severity === 'critical' ? 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border-rose-300 dark:border-rose-800/80' :
+                                    anom.severity === 'high' ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-300 dark:border-amber-800/80' :
+                                    'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border-blue-300 dark:border-blue-800/80'
+                                  }`}>
+                                    {anom.severity || "Medium"}
+                                  </span>
+                                </div>
+                                <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                                  ₹{anom.amount?.toLocaleString()} at {anom.merchant || anom.title || "Unknown Merchant"}
+                                </p>
+                              </div>
+                              <span className="text-lg font-bold text-amber-600 dark:text-amber-400 flex-shrink-0">
+                                ₹{anom.amount?.toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="pt-2.5 border-t border-slate-100 dark:border-slate-700/50 flex flex-col gap-1.5">
+                              <p className="text-xs text-slate-500 dark:text-slate-300 font-medium leading-relaxed">
+                                {anom.reason || anom.explanation || `Exceeds normal average (₹{anom.normalAverage?.toLocaleString()}).`}
+                              </p>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="p-6 text-center rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 shadow-sm shadow-slate-200/50 dark:shadow-none">
+                        <p className="text-sm text-slate-500 dark:text-slate-400 italic">No unusual spending anomalies detected this month.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4 animate-pulse">
+                  <div className="h-20 bg-slate-200 dark:bg-slate-800/60 rounded-2xl"></div>
+                  <div className="h-20 bg-slate-200 dark:bg-slate-800/60 rounded-2xl"></div>
+                </div>
+              )}
             </div>
 
             <TransactionReminders />

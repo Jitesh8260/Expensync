@@ -45,7 +45,7 @@ const ExpenseChart = ({ totalIncome, totalExpense }) => {
     };
 
     return (
-        <div className="bg-gradient-to-b from-slate-100/60 to-slate-200/60 dark:from-[#0c0f1c] dark:to-[#1a1d2e] border border-slate-200 dark:border-slate-700 p-8 rounded-3xl shadow-2xl w-full min-h-[400px] flex flex-col justify-center transition-all duration-500 hover:scale-[1.02]">
+        <div className="bg-gradient-to-b from-white to-slate-50/90 dark:from-[#0c0f1c] dark:to-[#1a1d2e] border border-slate-200/80 dark:border-slate-700/80 p-8 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none w-full min-h-[400px] flex flex-col justify-center transition-all duration-500 hover:scale-[1.02]">
             <h2 className="text-3xl font-bold text-center text-slate-800 dark:text-white mb-6 tracking-tight">
                 💰 Income vs Expense
             </h2>

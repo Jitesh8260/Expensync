@@ -4,19 +4,27 @@ import {
   showErrorToast,
   showInfoToast,
 } from "../utils/toast";
-import { loaderControl } from "../utils/loaderControl"; // 👈 loader utility
+import { loaderControl } from "../utils/loaderControl";
 
-const BASE_URL = "https://expensync-ex0w.onrender.com/api/v1";
+const log = (...args) => {
+  if (import.meta.env.DEV) {
+    console.log(...args);
+  }
+};
+
+
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
 
 // Axios instance
 const API = axios.create({
   baseURL: BASE_URL,
+  timeout: 15000,
   headers: { "Content-Type": "application/json" },
 });
 
 // Request interceptor → add access token + loader start
 API.interceptors.request.use((config) => {
-  console.log("📡 [REQUEST]", config.method?.toUpperCase(), config.url, {
+  log("📡 [REQUEST]", config.method?.toUpperCase(), config.url, {
     params: config.params,
     data: config.data,
     skipLoader: config.skipLoader,
@@ -40,7 +48,7 @@ API.interceptors.request.use((config) => {
 // Response interceptor → loader stop + handle expired access token
 API.interceptors.response.use(
   (response) => {
-    console.log("✅ [RESPONSE]", response.config.url, response.data);
+    log("✅ [RESPONSE]", response.config.url, response.data);
 
     if (!response.config.skipLoader) {
       loaderControl.setLoading(false); // 👈 loader OFF only if not skipped
@@ -66,7 +74,7 @@ API.interceptors.response.use(
         const refreshToken = localStorage.getItem("refreshToken");
         if (!refreshToken) throw new Error("No refresh token available");
 
-        console.log("♻️ Refreshing access token...");
+        log("♻️ Refreshing access token...");
 
         // Get new access token
         const res = await axios.post(`${BASE_URL}/auth/refresh-token`, {
@@ -101,10 +109,10 @@ API.interceptors.response.use(
 // ✅ Backend check
 //
 export const checkBackend = async () => {
-  console.log("🚀 Calling: checkBackend");
+  log("🚀 Calling: checkBackend");
   try {
     const res = await API.get("/");
-    console.log("✅ Backend API is running");
+    log("✅ Backend API is running");
     return res.data;
   } catch (err) {
     console.error("❌ Backend error:", err.message);
@@ -112,11 +120,11 @@ export const checkBackend = async () => {
   }
 };
 
-//
+
 // ✅ Auth
-//
+
 export const loginUser = async (formData) => {
-  console.log("🚀 Calling: loginUser", formData);
+  log("🚀 Calling: loginUser", formData);
   try {
     const res = await API.post("/auth/login", formData);
 
@@ -132,7 +140,7 @@ export const loginUser = async (formData) => {
 };
 
 export const logoutUser = () => {
-  console.log("🚀 Logging out user...");
+  log("🚀 Logging out user...");
   localStorage.removeItem("token");
   localStorage.removeItem("refreshToken");
   showInfoToast("Logged out successfully.");
@@ -140,7 +148,7 @@ export const logoutUser = () => {
 };
 
 export const signupUser = async (formData) => {
-  console.log("🚀 Calling: signupUser", formData);
+  log("🚀 Calling: signupUser", formData);
   try {
     const res = await API.post("/auth/signup", formData);
     showSuccessToast("Signup Successful! Please login.");
@@ -160,7 +168,7 @@ export const getTransactions = async (
   search = "",
   filter = ""
 ) => {
-  console.log(
+  log(
     `🚀 Calling: getTransactions | page=${page}, limit=${limit}, search="${search}", filter="${filter}"`
   );
   try {
@@ -175,10 +183,11 @@ export const getTransactions = async (
 };
 
 export const createTransaction = async (data) => {
-  console.log("🚀 Calling: createTransaction", data);
+  log("🚀 Calling: createTransaction", data);
   try {
     const res = await API.post("/transactions/create", data);
     showSuccessToast("Transaction added successfully!");
+    notifyDataRefresh();
     return res.data;
   } catch (error) {
     showErrorToast("Failed to add transaction");
@@ -186,14 +195,102 @@ export const createTransaction = async (data) => {
   }
 };
 
+export const getAllTransactionsForAnalytics = async () => {
+  log("🚀 Calling: getAllTransactionsForAnalytics");
+  try {
+    const res = await API.get("/transactions/all");
+    return res.data;
+  } catch (error) {
+    showErrorToast("Failed to fetch analytics transactions");
+    throw error;
+  }
+};
+
 export const deleteTransaction = async (id) => {
-  console.log("🚀 Calling: deleteTransaction", id);
+  log("🚀 Calling: deleteTransaction", id);
   try {
     const res = await API.delete(`/transactions/${id}`);
     showSuccessToast("Transaction deleted!");
+    notifyDataRefresh();
     return res.data;
   } catch (error) {
     showErrorToast("Failed to delete transaction");
+    throw error;
+  }
+};
+
+const predictionCache = new Map();
+const inFlightNLPRequests = new Map();
+
+let insightsCache = null;
+let insightsCacheTime = 0;
+let inFlightInsightsPromise = null;
+
+export const invalidatePredictionCache = (key) => {
+  if (key) {
+    predictionCache.delete(key.trim().toLowerCase());
+  } else {
+    predictionCache.clear();
+  }
+  insightsCache = null;
+  insightsCacheTime = 0;
+};
+
+export const notifyDataRefresh = () => {
+  predictionCache.clear();
+  insightsCache = null;
+  insightsCacheTime = 0;
+  window.dispatchEvent(new CustomEvent("expensync_data_refresh"));
+};
+
+export const parseTransactionWithNLP = async (text, signal) => {
+  log("🚀 Calling: parseTransactionWithNLP", text);
+  if (!text || !text.trim()) return null;
+  const cacheKey = text.trim().toLowerCase();
+  
+  if (predictionCache.has(cacheKey)) {
+    log("⚡ [Cache] Returning cached prediction for:", cacheKey);
+    return predictionCache.get(cacheKey);
+  }
+
+  // Deduplicate in-flight requests (React StrictMode protection)
+  if (inFlightNLPRequests.has(cacheKey)) {
+    log("⚡ [Dedupe] Joining in-flight request for:", cacheKey);
+    return inFlightNLPRequests.get(cacheKey);
+  }
+
+  const requestPromise = (async () => {
+    try {
+      const res = await API.post("/ai/nlp-parse", { text }, { skipLoader: true, signal });
+      predictionCache.set(cacheKey, res.data);
+      if (predictionCache.size > 50) {
+        const firstKey = predictionCache.keys().next().value;
+        predictionCache.delete(firstKey);
+      }
+      return res.data;
+    } catch (error) {
+      if (error.name !== "CanceledError" && error.name !== "AbortError") {
+        showErrorToast("Failed to parse AI text");
+      }
+      throw error;
+    } finally {
+      inFlightNLPRequests.delete(cacheKey);
+    }
+  })();
+
+  inFlightNLPRequests.set(cacheKey, requestPromise);
+  return requestPromise;
+};
+
+export const parseReceiptWithOCR = async (formData) => {
+  log("🚀 Calling: parseReceiptWithOCR");
+  try {
+    const res = await API.post("/ai/ocr-parse", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
+  } catch (error) {
+    showErrorToast("Failed to parse receipt image");
     throw error;
   }
 };
@@ -202,7 +299,7 @@ export const deleteTransaction = async (id) => {
 // ✅ Budgets
 //
 export const fetchBudgets = async () => {
-  console.log("🚀 Calling: fetchBudgets");
+  log("🚀 Calling: fetchBudgets");
   try {
     const res = await API.get("/budgets");
     return res.data;
@@ -213,10 +310,11 @@ export const fetchBudgets = async () => {
 };
 
 export const addBudget = async (budgetData) => {
-  console.log("🚀 Calling: addBudget", budgetData);
+  log("🚀 Calling: addBudget", budgetData);
   try {
     const res = await API.post("/budgets", budgetData);
     showSuccessToast("Budget added successfully!");
+    notifyDataRefresh();
     return res.data;
   } catch (error) {
     showErrorToast("Failed to add budget");
@@ -228,7 +326,7 @@ export const addBudget = async (budgetData) => {
 // ✅ Debts
 //
 export const fetchDebts = async () => {
-  console.log("🚀 Calling: fetchDebts");
+  log("🚀 Calling: fetchDebts");
   try {
     const res = await API.get("/debts");
     return res.data;
@@ -239,10 +337,11 @@ export const fetchDebts = async () => {
 };
 
 export const addDebt = async (debtData) => {
-  console.log("🚀 Calling: addDebt", debtData);
+  log("🚀 Calling: addDebt", debtData);
   try {
     const res = await API.post("/debts/create", debtData);
     showSuccessToast("Debt added successfully!");
+    notifyDataRefresh();
     return res.data;
   } catch (error) {
     showErrorToast("Failed to add debt");
@@ -251,10 +350,11 @@ export const addDebt = async (debtData) => {
 };
 
 export const deleteDebt = async (id) => {
-  console.log("🚀 Calling: deleteDebt", id);
+  log("🚀 Calling: deleteDebt", id);
   try {
     const res = await API.delete(`/debts/${id}`);
     showSuccessToast("Debt deleted!");
+    notifyDataRefresh();
     return res.data;
   } catch (error) {
     showErrorToast("Failed to delete debt");
@@ -266,7 +366,7 @@ export const deleteDebt = async (id) => {
 // ✅ Budget Summary
 //
 export const fetchBudgetSummary = async () => {
-  console.log("🚀 Calling: fetchBudgetSummary");
+  log("🚀 Calling: fetchBudgetSummary");
   try {
     const res = await API.get("/summary");
     return res.data;
@@ -280,7 +380,7 @@ export const fetchBudgetSummary = async () => {
 // ✅ Category Goals (skip loader)
 //
 export const fetchCategoryGoals = async () => {
-  console.log("🚀 Calling: fetchCategoryGoals");
+  log("🚀 Calling: fetchCategoryGoals");
   try {
     const res = await API.get("/category-goals", { skipLoader: true });
     return res.data;
@@ -290,15 +390,16 @@ export const fetchCategoryGoals = async () => {
   }
 };
 
-export const setCategoryGoals = async (categoryGoals) => {
-  console.log("🚀 Calling: setCategoryGoals", categoryGoals);
+export const setCategoryGoals = async (categoryGoals, monthlySavingsGoal) => {
+  log("🚀 Calling: setCategoryGoals", categoryGoals, monthlySavingsGoal);
   try {
     const res = await API.post(
       "/category-goals/set",
-      { categoryGoals },
+      { categoryGoals, monthlySavingsGoal },
       { skipLoader: true }
     );
     showSuccessToast("Category goals updated!");
+    notifyDataRefresh();
     return res.data;
   } catch (error) {
     showErrorToast("Failed to set category goals");
@@ -310,7 +411,7 @@ export const setCategoryGoals = async (categoryGoals) => {
 // ✅ Reminders (skip loader)
 //
 export const fetchReminders = async () => {
-  console.log("🚀 Calling: fetchReminders");
+  log("🚀 Calling: fetchReminders");
   try {
     const res = await API.get("/reminders", { skipLoader: true });
     return res.data;
@@ -321,10 +422,11 @@ export const fetchReminders = async () => {
 };
 
 export const addReminder = async (data) => {
-  console.log("🚀 Calling: addReminder", data);
+  log("🚀 Calling: addReminder", data);
   try {
     const res = await API.post("/reminders/create", data, { skipLoader: true });
     showSuccessToast("Reminder added successfully!");
+    notifyDataRefresh();
     return res.data;
   } catch (error) {
     showErrorToast("Failed to add reminder");
@@ -333,19 +435,58 @@ export const addReminder = async (data) => {
 };
 
 export const deleteReminder = async (id) => {
-  console.log("🚀 Calling: deleteReminder", id);
+  log("🚀 Calling: deleteReminder", id);
   try {
     const res = await API.delete(`/reminders/${id}`, { skipLoader: true });
     showSuccessToast("Reminder deleted!");
+    notifyDataRefresh();
     return res.data;
   } catch (error) {
     showErrorToast(
       error.response?.data?.msg ||
-        error.response?.data?.message ||
-        "Failed to delete reminder"
+      error.response?.data?.message ||
+      "Failed to delete reminder"
     );
     throw error;
   }
+};
+
+export const getSpendingPredictions = async (months = 6) => {
+  log("🚀 Calling: getSpendingPredictions", months);
+  try {
+    const res = await API.get("/ml/predict-spending", { params: { months }, skipLoader: true });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch ML spending predictions:", error);
+    return null;
+  }
+};
+
+export const getFinancialInsights = async (months = 6, forceRefresh = false) => {
+  log("🚀 Calling: getFinancialInsights", months);
+  if (!forceRefresh && insightsCache && Date.now() - insightsCacheTime < 60000) {
+    return insightsCache;
+  }
+
+  if (inFlightInsightsPromise) {
+    return inFlightInsightsPromise;
+  }
+
+  inFlightInsightsPromise = (async () => {
+    try {
+      const res = await API.get("/ml/financial-insights", { params: { months }, skipLoader: true });
+      insightsCache = res.data;
+      insightsCacheTime = Date.now();
+      return res.data;
+    } catch (error) {
+      console.error("Failed to fetch ML financial insights:", error);
+      return null;
+    } finally {
+      inFlightInsightsPromise = null;
+    }
+  })();
+
+  return inFlightInsightsPromise;
 };
 
 export default API;

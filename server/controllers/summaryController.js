@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Budget = require("../models/Budget");
 const CategoryBudgetGoal = require("../models/CategoryBudgetGoal");
 const Transaction = require("../models/Transaction");
 
@@ -8,12 +9,29 @@ const getBudgetSummary = async (req, res) => {
         // convert userId string to ObjectId
         const userId = new mongoose.Types.ObjectId(req.user);
 
-        // 1️⃣ Total Budget (sum of all category goals)
-        const budgetAgg = await CategoryBudgetGoal.aggregate([
-            { $match: { user: userId } },
-            { $group: { _id: null, totalBudget: { $sum: "$goal" } } }
-        ]);
-        const totalBudget = budgetAgg[0]?.totalBudget || 0;
+        // 1️⃣ Total Budget (sum of all category goals) & Monthly Savings Goal
+        const budgetDoc = await Budget.findOne({ userId });
+        let totalBudget = 0;
+        let monthlySavingsGoal = 0;
+
+        if (budgetDoc) {
+            if (budgetDoc.categoryBudgets) {
+                for (const goal of budgetDoc.categoryBudgets.values()) {
+                    totalBudget += (Number(goal) || 0);
+                }
+            }
+            monthlySavingsGoal = budgetDoc.monthlySavingsGoal || 0;
+        } else {
+            // Fallback to legacy collection if unified document not yet created
+            const legacyGoals = await CategoryBudgetGoal.find({ user: userId });
+            legacyGoals.forEach(g => {
+                if (g.category === "Savings") {
+                    monthlySavingsGoal = g.goal;
+                } else if (g.category) {
+                    totalBudget += g.goal;
+                }
+            });
+        }
 
         // 2️⃣ Total Income & Expenses aggregation
         const txAgg = await Transaction.aggregate([
@@ -43,7 +61,7 @@ const getBudgetSummary = async (req, res) => {
             .lean();
 
         // 4️⃣ Savings
-        const savings = totalBudget - totalExpenses;
+        const savings = totalIncome - totalExpenses;
 
         // 5️⃣ Response
         res.status(200).json({
@@ -51,6 +69,7 @@ const getBudgetSummary = async (req, res) => {
             totalExpenses,
             totalBudget,
             savings,
+            monthlySavingsGoal,
             recentTransactions,
             totalTransactions
         });

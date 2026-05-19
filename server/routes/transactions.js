@@ -9,6 +9,9 @@ router.post("/create", authMiddleware, transactionController.createTransaction);
 // Get all transactions for the logged-in user (protected)
 router.get("/", authMiddleware, transactionController.getTransactions);
 
+// Get all transactions for analytics (protected, NO PAGINATION)
+router.get("/all", authMiddleware, transactionController.getAllTransactionsForAnalytics);
+
 // Get transactions by user ID (protected)
 router.get("/user", authMiddleware, transactionController.getTransactions);  // get transactions for logged-in user
 

@@ -1,20 +1,18 @@
 const mongoose = require("mongoose");
 
 const budgetSchema = new mongoose.Schema({
-  user: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
+    index: true,
   },
-  category: {
-    type: String,
-    required: true,
+  categoryBudgets: {
+    type: Map,
+    of: Number,
+    default: { Food: 0, Entertainment: 0, Travel: 0, Utilities: 0, Others: 0 },
   },
-  goal: {
-    type: Number,
-    required: true,
-  },
-  spent: {
+  monthlySavingsGoal: {
     type: Number,
     default: 0,
   },
