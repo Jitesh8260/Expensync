@@ -192,6 +192,17 @@ class MLBridgeService {
         let body = "";
         res.on("data", (chunk) => { body += chunk; });
         res.on("end", () => {
+          if (res.statusCode >= 400) {
+            if (path !== "/health") {
+              console.log(`❌ [ML Bridge] HTTP error ${res.statusCode} from Flask for ${path}`);
+            }
+            resolve(null);
+            return;
+          }
+          if (!body || !body.trim()) {
+            resolve(null);
+            return;
+          }
           try {
             resolve(JSON.parse(body));
           } catch {

@@ -185,3 +185,5 @@ To prepare the MERN + Flask stack for cloud deployment, several optimizations ha
 *   **Production WSGI (Gunicorn)**: The Python service dependencies include `gunicorn`, enabling the Flask application to run concurrent worker processes under production workloads.
 *   **Global Error Handling Middleware**: An Express error handler captures unhandled controller exceptions, sanitizes sensitive trace paths, and formats error responses into consistent JSON objects.
 *   **Health Diagnostics**: A `/health` route reports server status and database connectivity to monitoring services.
+*   **Reverse Proxy Trust**: Configured `app.set('trust proxy', 1)` on Express to enable standard client IP detection through proxy headers (e.g. `X-Forwarded-For`) under deployment hosting providers (Render/AWS), resolving `express-rate-limit` rate-limiting conflicts.
+*   **HTTP Stream Safety**: Implemented response code validation and non-empty stream checks before invoking `JSON.parse` inside the server's HTTP requester module, preventing socket resets or HTML error pages from throwing uncaught parse errors.
