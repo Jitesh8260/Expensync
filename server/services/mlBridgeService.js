@@ -12,6 +12,7 @@
  */
 
 const http = require("http");
+const https = require("https");
 const { ML_CONFIG } = require("./keywordKnowledgeBase");
 
 const VALID_CATEGORIES = ["Food", "Entertainment", "Travel", "Utilities", "Income", "Others"];
@@ -177,24 +178,25 @@ class MLBridgeService {
   _request(method, path, data, timeoutMs) {
     const timeout = timeoutMs || ML_CONFIG.mlTimeoutMs;
     const url = new URL(path, ML_CONFIG.mlServiceUrl);
+    const client = url.protocol === "https:" ? https : http;
 
     return new Promise((resolve) => {
       const options = {
         hostname: url.hostname,
-        port: url.port,
+        port: url.port || (url.protocol === "https:" ? 443 : 80),
         path: url.pathname + url.search,
         method,
         headers: { "Content-Type": "application/json" },
         timeout
       };
 
-      const req = http.request(options, (res) => {
+      const req = client.request(options, (res) => {
         let body = "";
         res.on("data", (chunk) => { body += chunk; });
         res.on("end", () => {
-          if (res.statusCode >= 400) {
+          if (res.statusCode >= 300) {
             if (path !== "/health") {
-              console.log(`❌ [ML Bridge] HTTP error ${res.statusCode} from Flask for ${path}`);
+              console.log(`❌ [ML Bridge] HTTP error or redirect (status ${res.statusCode}) from Flask for ${path}`);
             }
             resolve(null);
             return;
@@ -205,8 +207,10 @@ class MLBridgeService {
           }
           try {
             resolve(JSON.parse(body));
-          } catch {
-            if (path !== "/health") console.log("❌ [ML Bridge] Malformed JSON response received.");
+          } catch (e) {
+            if (path !== "/health") {
+              console.log(`❌ [ML Bridge] Malformed JSON response received for ${path}. Raw response body:`, body);
+            }
             resolve(null); // Malformed JSON
           }
         });
