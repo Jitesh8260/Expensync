@@ -14,7 +14,7 @@
 ## 🌟 Visual Preview & Layout
 
 ### 🖥️ Dashboard Showcase
-![Expensync Full Demo](./public/demo.png)
+![Expensync Full Demo](./public/Dashboard.png)
 
 ### 🌞 Light Mode | 🌙 Dark Mode
 | Light Theme Layout | Dark Theme Layout |
@@ -212,7 +212,7 @@ The application utilizes six MongoDB collections modeled via Mongoose to maintai
 ## 👨‍💻 Author & Credits
 
 *   **Jitesh Bhakat** (Creator & Full-stack Architect)
-    *   GitHub: [@Jitesh8260](https://github.com/Jitesh8260)
+    *   GitHub: [Jitesh8260](https://github.com/Jitesh8260)
     *   LinkedIn: [Jitesh Kumar](https://www.linkedin.com/in/jitesh-kumar-2521b7249/)
 
 ---
